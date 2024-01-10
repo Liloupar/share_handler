@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Log
 
 import androidx.annotation.NonNull
 import androidx.core.app.Person
@@ -154,16 +155,20 @@ class ShareHandlerPlugin: FlutterPlugin, Messages.ShareHandlerApi, EventChannel.
   private fun handleIntent(intent: Intent, initial: Boolean) {
     val attachments: List<Messages.SharedAttachment>?
     val text: String?
+    Log.i("ShareHandlerPlugin", "Intent action: ${intent.action}")
+    Log.i("ShareHandlerPlugin", "intent.type?: ${intent.type}")
     when {
       (intent.type?.startsWith("text") != true)
               && (intent.action == Intent.ACTION_SEND
               || intent.action == Intent.ACTION_SEND_MULTIPLE) -> { // Sharing images or videos
-
+        Log.i("ShareHandlerPlugin", "when 1")
         attachments = attachmentsFromIntent(intent)
         text = null
       }
       (intent.type == null || intent.type?.startsWith("text") == true)
-              && intent.action == Intent.ACTION_SEND -> { // Sharing text
+              && (intent.action == Intent.ACTION_SEND
+              || intent.action == Intent.ACTION_SEND_MULTIPLE)  -> { // Sharing text
+        Log.i("ShareHandlerPlugin", "when 2")
         text = intent.getStringExtra(Intent.EXTRA_TEXT)
         attachments = if (text == null) {
           attachmentsFromIntent(intent)
@@ -173,12 +178,15 @@ class ShareHandlerPlugin: FlutterPlugin, Messages.ShareHandlerApi, EventChannel.
       }
       (intent.type?.startsWith("text") != true)
               && intent.action == Intent.ACTION_VIEW -> { // Opening URL
+        Log.i("ShareHandlerPlugin", "when 3")
         attachments = attachmentsFromIntent(intent)
         text = null
       }
       (intent.type == null || intent.type?.startsWith("text") == true)
               && intent.action == Intent.ACTION_VIEW -> { // Sharing text
+        Log.i("ShareHandlerPlugin", "when 4")
         text = intent.getStringExtra(Intent.EXTRA_TEXT)
+        Log.i("ShareHandlerPlugin", "text: $text")
         attachments = if (text == null) {
           attachmentsFromIntent(intent)
         } else {
@@ -190,6 +198,7 @@ class ShareHandlerPlugin: FlutterPlugin, Messages.ShareHandlerApi, EventChannel.
         text = intent.dataString
       }
       else -> {
+        Log.i("ShareHandlerPlugin", "else")
         attachments = null
         text = null
       }
@@ -209,6 +218,12 @@ class ShareHandlerPlugin: FlutterPlugin, Messages.ShareHandlerApi, EventChannel.
     return when (intent.action) {
       Intent.ACTION_SEND -> {
         val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM) ?: return null
+        return listOf(attachmentForUri(uri)).mapNotNull { it }
+      }
+      Intent.ACTION_VIEW -> {
+        Log.i("attachmentsFromIntent", "ACTION_VIEW")
+        val uri = intent.data ?: return null
+        Log.i("attachmentsFromIntent", "uri: $uri")
         return listOf(attachmentForUri(uri)).mapNotNull { it }
       }
       Intent.ACTION_SEND_MULTIPLE -> {
