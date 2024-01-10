@@ -29,7 +29,7 @@ dependencies:
 #  share_handler_android: ^0.0.7
   share_handler_android:
     git:
-      url: https://github.com/Liloupar/share_handler/tree/main/share_handler_android
+      url: https://github.com/Liloupar/share_handler/share_handler_android
 #    path: ../share_handler_android
   share_handler_ios: ^0.0.13
   # share_handler_ios:
