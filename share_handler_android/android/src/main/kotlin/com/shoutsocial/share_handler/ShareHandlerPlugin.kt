@@ -213,6 +213,12 @@ class ShareHandlerPlugin : FlutterPlugin, Messages.ShareHandlerApi, EventChannel
         Log.i("attachmentsFromIntent", "uri: $uri")
         return listOf(attachmentForUri(uri)).mapNotNull { it }
       }
+      Intent.ACTION_VIEW -> {
+        Log.i("attachmentsFromIntent", "ACTION_VIEW")
+        val uri = intent.data ?: return null
+        Log.i("attachmentsFromIntent", "uri: $uri")
+        return listOf(attachmentForUri(uri)).mapNotNull { it }
+      }
 
       Intent.ACTION_SEND_MULTIPLE -> {
         val uris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
