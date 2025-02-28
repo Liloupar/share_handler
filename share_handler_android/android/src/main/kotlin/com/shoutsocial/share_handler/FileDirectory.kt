@@ -119,6 +119,18 @@ object FileDirectory {
                 targetFile = File(context.cacheDir, "${prefix}_${Date().time}.$type")
             }
             val uri = selectionArgs?.let { args -> uri.buildUpon().appendPath(args.first()).build() } ?: uri
+            //添加权限
+            //copy from https://stackoverflow.com/questions/42584327/when-using-intent-action-get-content-how-to-avoid-securityexception
+            try {
+                context.grantUriPermission(
+                        context.getPackageName(),
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (e: Exception) {
+                // ignore
+                Log.e("file_picker", "授权尝试2, 失败", e)
+            }
             context.contentResolver.openInputStream(uri)?.use { input ->
                 FileOutputStream(targetFile).use { fileOut ->
                     input.copyTo(fileOut)
